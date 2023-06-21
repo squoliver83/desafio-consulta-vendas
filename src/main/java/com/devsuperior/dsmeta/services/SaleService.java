@@ -2,6 +2,7 @@ package com.devsuperior.dsmeta.services;
 
 import com.devsuperior.dsmeta.dto.SaleMinDTO;
 import com.devsuperior.dsmeta.dto.SaleReportDTO;
+import com.devsuperior.dsmeta.dto.SaleSummaryDTO;
 import com.devsuperior.dsmeta.entities.Sale;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+
+import static com.devsuperior.dsmeta.utils.DateUtil.getMaxDate;
+import static com.devsuperior.dsmeta.utils.DateUtil.getMinDate;
 
 @Service
 public class SaleService {
@@ -33,17 +34,9 @@ public class SaleService {
 		return repository.generateReport(min, max, name, pageable);
 	}
 
-	private LocalDate getMaxDate(String maxDate) {
-		if(!maxDate.equals("")) {
-			return LocalDate.parse(maxDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-		}
-		return LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-	}
-
-	private LocalDate getMinDate(LocalDate max, String minDate) {
-		if(!minDate.equals("")) {
-			return LocalDate.parse(minDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-		}
-		return max.minusYears(1L);
+	public Page<SaleSummaryDTO> generateSummary(String minDate, String maxDate, Pageable pageable) {
+		LocalDate max = getMaxDate(maxDate);
+		LocalDate min = getMinDate(max, minDate);
+		return repository.generateSummary(min, max, pageable);
 	}
 }
